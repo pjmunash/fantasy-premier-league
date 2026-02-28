@@ -17,8 +17,19 @@ const server = http.createServer((req, res) => {
   }
 
   if (!req.url.startsWith('/api/')) {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not found');
+    // Serve index.html for non-API routes (SPA fallback)
+    const fs = require('fs');
+    const path = require('path');
+    const indexPath = path.join(__dirname, 'index.html');
+    fs.readFile(indexPath, (err, data) => {
+      if (err) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Error loading index.html');
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(data);
+    });
     return;
   }
 
