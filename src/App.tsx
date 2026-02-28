@@ -2,14 +2,14 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { FPLProvider, useFPL } from './context/FPLContext';
 import Login from './components/Login';
-import Team from './components/Team.tsx';
-import Planner from './components/Planner';
-import Transfers from './components/Transfers';
-import Live from './components/Live';
+import TeamPage from './pages/TeamPage';
+import PlannerPage from './pages/PlannerPage';
+import TransfersPage from './pages/TransfersPage';
+import LivePage from './pages/LivePage';
 import Dashboard from './components/Dashboard';
-import PlayerStatus from './components/PlayerStatus';
-import PlayerComparison from './components/PlayerComparison';
-import LeagueManagement from './components/LeagueManagement';
+import LeaguesPage from './pages/LeaguesPage';
+import AvailabilityPage from './pages/AvailabilityPage';
+import ComparePage from './pages/ComparePage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -56,7 +56,7 @@ const AppRoutes: React.FC = () => {
           path="/team"
           element={
             <ProtectedRoute>
-              <Team />
+              <TeamPage />
             </ProtectedRoute>
           }
         />
@@ -64,7 +64,7 @@ const AppRoutes: React.FC = () => {
           path="/planner"
           element={
             <ProtectedRoute>
-              <Planner />
+              <PlannerPage />
             </ProtectedRoute>
           }
         />
@@ -72,7 +72,7 @@ const AppRoutes: React.FC = () => {
           path="/transfers"
           element={
             <ProtectedRoute>
-              <Transfers />
+              <TransfersPage />
             </ProtectedRoute>
           }
         />
@@ -80,23 +80,23 @@ const AppRoutes: React.FC = () => {
           path="/live"
           element={
             <ProtectedRoute>
-              <Live />
+              <LivePage />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/status"
+          path="/availability"
           element={
             <ProtectedRoute>
-              <PlayerStatus />
+              <AvailabilityPage />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/comparison"
+          path="/compare"
           element={
             <ProtectedRoute>
-              <PlayerComparison />
+              <ComparePage />
             </ProtectedRoute>
           }
         />
@@ -104,7 +104,7 @@ const AppRoutes: React.FC = () => {
           path="/leagues"
           element={
             <ProtectedRoute>
-              <LeagueManagement />
+              <LeaguesPage />
             </ProtectedRoute>
           }
         />
