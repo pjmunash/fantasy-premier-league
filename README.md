@@ -4,7 +4,7 @@ A comprehensive React + Vite web application for Fantasy Premier League players 
 
 ---
 
-_Last redeployed: March 2, 2026_
+_Last redeployed: March 2, 2026 (combined workflow test)_
 
 ## Features
 
