@@ -2,6 +2,10 @@
 
 A comprehensive React + Vite web application for Fantasy Premier League players to plan their strategy, analyze fixtures, and optimize their team for future gameweeks.
 
+---
+
+_Last redeployed: March 2, 2026_
+
 ## Features
 
 - **Team Connection**: Connect your real FPL team using your Team ID
@@ -162,9 +166,3 @@ MIT License - Feel free to use this project for personal or commercial purposes.
 ## Disclaimer
 
 This is an unofficial tool and is not affiliated with Fantasy Premier League or the Premier League. All data is sourced from the official FPL API.
-
-## Acknowledgments
-
-- Official FPL API for providing public endpoints
-- LiveFPL.net for inspiration
-- React, Vite, and Tailwind CSS communities
