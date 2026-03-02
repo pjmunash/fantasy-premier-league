@@ -67,7 +67,7 @@ const LeagueManagement: React.FC = () => {
             <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">Your Leagues</h2>
             {filteredLeagues.length > 0 ? (
               <div className="mt-2 space-y-2">
-                {filteredLeagues.map(league => (
+                {filteredLeagues.map((league: any) => (
                   <button key={league.id} onClick={() => setSelectedLeague(league)} className={`w-full p-3 rounded-lg text-left transition border-l-4 ${selectedLeague?.id === league.id ? 'bg-purple-100 dark:bg-purple-900/40 border-purple-500' : 'bg-gray-50 dark:bg-gray-700 border-transparent hover:bg-gray-100 dark:hover:bg-gray-600'}`}>
                     <div className="font-semibold text-sm text-gray-800 dark:text-gray-200">{league.name}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">ID: {league.id}</div>
@@ -135,7 +135,7 @@ const LeagueManagement: React.FC = () => {
                     {selectedLeague.pagination?.hasNext && (
                       <div className="mt-4 flex justify-center">
                         <button
-                          onClick={loadMoreStandings}
+                          // onClick={loadMoreStandings} // TODO: Implement or remove this handler
                           className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition text-sm"
                         >
                           Load More

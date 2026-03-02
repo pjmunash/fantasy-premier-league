@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+export function useFPL() {
+  const context = React.useContext(FPLContext);
+  if (!context) {
+    throw new Error('useFPL must be used within an FPLProvider');
+  }
+  return context;
+}
+import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { fplApi } from '../services/fplApi';
 import { storage } from '../utils/storage';
@@ -57,13 +64,7 @@ interface FPLContextType {
 
 const FPLContext = createContext<FPLContextType | undefined>(undefined);
 
-export function useFPL() {
-  const context = useContext(FPLContext);
-  if (!context) {
-    throw new Error('useFPL must be used within an FPLProvider');
-  }
-  return context;
-}
+
 
 export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [bootstrapData, setBootstrapData] = useState<FPLBootstrapData | null>(null);
@@ -74,7 +75,7 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [fixtures, setFixtures] = useState<Fixture[] | null>(null);
   const [transferPlans, setTransferPlans] = useState<TransferPlan[]>([]);
   const [chipPlans, setChipPlans] = useState<ChipPlan[]>([]);
-  const [selectedGameweek, setSelectedGameweekState] = useState<number>(storage.getSelectedGW() || 1);
+  const [selectedGameweek, setSelectedGameweek] = useState<number>(storage.getSelectedGW() || 1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [leagues, setLeagues] = useState<any | null>(null);
@@ -196,61 +197,16 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const disconnect = () => {
     storage.clear();
-    return (
-      <FPLContext.Provider
-        value={{
-          bootstrapData,
-          managerData,
-          currentPicks,
-          fixtures,
-          leagues,
-          leaguesLoading,
-          leaguesError,
-          transferPlans,
-          chipPlans,
-          selectedGameweek,
-          loading,
-          error,
-          connectTeam,
-          refreshData,
-          disconnect,
-          setSelectedGameweek,
-          addTransferPlan: plan => setTransferPlans(prev => [...prev, plan]),
-          removeTransferPlan: gw => setTransferPlans(prev => prev.filter(p => p.gameweek !== gw)),
-          addChipPlan: plan => setChipPlans(prev => [...prev, plan]),
-          removeChipPlan: gw => setChipPlans(prev => prev.filter(p => p.gameweek !== gw)),
-          getPlayer: id => bootstrapData?.elements.find(p => p.id === id),
-          getPlayerWithLiveData: (id, gw) => {
-            const player = bootstrapData?.elements.find(p => p.id === id);
-            if (!player) return undefined;
-            if (!gw) return player;
-            const live = liveData[gw]?.elements?.find((p: any) => p.id === id);
-            return live ? { ...player, ...live } : player;
-          },
-          getTeam: id => bootstrapData?.teams.find(t => t.id === id),
-          getCurrentGameweek: () => bootstrapData?.events.find(e => e.is_current)?.id || 1,
-          getPicksForGameweek: gw => picksByGW[gw] || null,
-          getFinancialStatus: gw => {
-            const picks = picksByGW[gw];
-            if (!picks) return { bank: 0, squadValue: 0, totalBudget: 0 };
-            const squadValue = picks.picks.reduce((sum, pick) => {
-              const player = bootstrapData?.elements.find(p => p.id === pick.element);
-              return sum + (player?.now_cost || 0);
-            }, 0) / 10;
-            return {
-              bank: picks.entry_history.bank / 10,
-              squadValue,
-              totalBudget: squadValue + picks.entry_history.bank / 10,
-            };
-          },
-          fetchPlayerLeagues,
-          fetchLeagueStandings,
-          refreshLeagues,
-        }}
-      >
-        {children}
-      </FPLContext.Provider>
-    );
+    setManagerData(null);
+    setCurrentPicks(null);
+    setPicksByGW({});
+    setTransferPlans([]);
+    setChipPlans([]);
+    setError(null);
+    setLeagues(null);
+    setLeaguesError(null);
+    setLeaguesLoading(false);
+  };
   const addTransferPlan = (plan: TransferPlan) => {
     const updated = [...transferPlans.filter(p => p.gameweek !== plan.gameweek), plan];
     setTransferPlans(updated);
@@ -472,10 +428,3 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   );
 };
 
-export function useFPL() {
-  const context = useContext(FPLContext);
-  if (!context) {
-    throw new Error('useFPL must be used within an FPLProvider');
-  }
-  return context;
-}
