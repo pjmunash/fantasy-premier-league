@@ -85,18 +85,31 @@ const Team: React.FC = () => {
     if (!picksForView || !selectedGameweek) return 0;
     const isBenchBoost = picksForView.active_chip === 'bboost';
     const picksToCount = isBenchBoost ? picksForView.picks : picksForView.picks.slice(0, 11);
+
     let total = 0;
+    let captainPick = picksToCount.find(p => p.is_captain);
+    let vicePick = picksToCount.find(p => p.is_vice_captain);
+    let captainPoints = 0;
+    let vicePoints = 0;
+    if (captainPick) {
+      const player = getPlayerWithLiveData(captainPick.element, selectedGameweek);
+      captainPoints = player?.event_points || 0;
+    }
+    if (vicePick) {
+      const player = getPlayerWithLiveData(vicePick.element, selectedGameweek);
+      vicePoints = player?.event_points || 0;
+    }
     picksToCount.forEach(pick => {
-      const player = getPlayerWithLiveData(pick.element, selectedGameweek);
-      if (player) {
-        const points = player.event_points ?? 0;
-        if (pick.is_captain) {
-          total += points * 2;
-        } else {
-          total += points;
-        }
+      if (!pick.is_captain && !pick.is_vice_captain) {
+        const player = getPlayerWithLiveData(pick.element, selectedGameweek);
+        total += player?.event_points || 0;
       }
     });
+    if (captainPick && captainPoints > 0) {
+      total += captainPoints * 2;
+    } else if (vicePick && vicePoints > 0) {
+      total += vicePoints * 2;
+    }
     return total;
   }, [picksForView, selectedGameweek, getPlayerWithLiveData]);
 

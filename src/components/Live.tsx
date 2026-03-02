@@ -69,18 +69,35 @@ const Live: React.FC = () => {
   // Calculate total points from starting XI (or all 15 if bench boost) with captain multiplier
   const totalPoints = useMemo(() => {
     if (!currentPicks || !currentGW) return 0;
-    
     const isBenchBoost = currentPicks.active_chip === 'bboost';
     const picksToCount = isBenchBoost ? currentPicks.picks : currentPicks.picks.slice(0, 11);
-    
-    return picksToCount.reduce((total, pick) => {
-      const player = getPlayerWithLiveData(pick.element, currentGW);
-      if (!player) return total;
-      
-      const points = player.event_points || 0;
-      const multiplier = pick.is_captain ? 2 : 1;
-      return total + (points * multiplier);
-    }, 0);
+
+    let total = 0;
+    let captainPick = picksToCount.find(p => p.is_captain);
+    let vicePick = picksToCount.find(p => p.is_vice_captain);
+    let captainPoints = 0;
+    let vicePoints = 0;
+    if (captainPick) {
+      const player = getPlayerWithLiveData(captainPick.element, currentGW);
+      captainPoints = player?.event_points || 0;
+    }
+    if (vicePick) {
+      const player = getPlayerWithLiveData(vicePick.element, currentGW);
+      vicePoints = player?.event_points || 0;
+    }
+    picksToCount.forEach(pick => {
+      // Don't double captain/vice here
+      if (!pick.is_captain && !pick.is_vice_captain) {
+        const player = getPlayerWithLiveData(pick.element, currentGW);
+        total += player?.event_points || 0;
+      }
+    });
+    if (captainPick && captainPoints > 0) {
+      total += captainPoints * 2;
+    } else if (vicePick && vicePoints > 0) {
+      total += vicePoints * 2;
+    }
+    return total;
   }, [currentPicks, currentGW, getPlayerWithLiveData]);
 
   // Calculate dynamic overall total points (previous GWs + current GW live points)
