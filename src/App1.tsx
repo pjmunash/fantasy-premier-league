@@ -7,7 +7,7 @@ import Planner from './components/Planner';
 import Transfers from './components/Transfers';
 import Live from './components/Live';
 import LeagueManagement from './components/LeagueManagement';
-import PlayerStatus from './components/PlayerStatus';
+import Availability from './components/Availability';
 import PlayerComparison from './components/PlayerComparison';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -46,7 +46,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/planner" element={<ProtectedRoute><Planner /></ProtectedRoute>} />
         <Route path="/transfers" element={<ProtectedRoute><Transfers /></ProtectedRoute>} />
         <Route path="/live" element={<ProtectedRoute><Live /></ProtectedRoute>} />
-        <Route path="/availability" element={<ProtectedRoute><PlayerStatus /></ProtectedRoute>} />
+        <Route path="/availability" element={<ProtectedRoute><Availability /></ProtectedRoute>} />
         <Route path="/compare" element={<ProtectedRoute><PlayerComparison /></ProtectedRoute>} />
         <Route path="/leagues" element={<ProtectedRoute><LeagueManagement /></ProtectedRoute>} />
         <Route path="/" element={<Navigate to="/team" replace />} />
