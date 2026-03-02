@@ -1,21 +1,17 @@
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useFPL } from '../context/FPLContext';
 import { getTeamShirtUrl } from '../utils/teamShirts';
 
-const PlayerStatus: React.FC = () => {
+const Availability: React.FC = () => {
   const { currentPicks, bootstrapData, getPlayer, getTeam } = useFPL();
-  const navigate = useNavigate();
 
   // Get status for all players
   const playerStatuses = useMemo(() => {
     if (!currentPicks || !bootstrapData) return [];
-    
     return currentPicks.picks
       .map(pick => {
         const player = getPlayer(pick.element);
         if (!player) return null;
-        
         return {
           pick,
           player,
@@ -54,14 +50,7 @@ const PlayerStatus: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <button
-        onClick={() => navigate('/team')}
-        className="mb-6 px-4 py-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition"
-      >
-        ← Back to Team
-      </button>
-
-      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">Player Status & Injuries</h1>
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-8">Player Availability</h1>
 
       {/* Flagged Players */}
       {flaggedPlayers.length > 0 && (
@@ -177,4 +166,4 @@ const PlayerStatus: React.FC = () => {
   );
 };
 
-export default PlayerStatus;
+export default Availability;
