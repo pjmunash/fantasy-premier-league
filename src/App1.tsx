@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { FPLProvider, useFPL } from './context/FPLContext';
 import Login from './components/Login';
 import Team from './components/Team';
@@ -38,7 +38,7 @@ const AppRoutes: React.FC = () => {
   const { managerData } = useFPL();
 
   return (
-    <Router>
+    <BrowserRouter basename="/fantasy-premier-league">
       <Routes>
         <Route path="/login" element={managerData ? <Navigate to="/team" replace /> : <Login />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -52,7 +52,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/" element={<Navigate to="/team" replace />} />
         <Route path="*" element={<Navigate to="/team" replace />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 };
 

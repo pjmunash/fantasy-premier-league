@@ -6,7 +6,7 @@ import autoprefixer from 'autoprefixer'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/fpl-planner/',
+  base: '/fantasy-premier-league/',
   css: {
     postcss: {
       plugins: [tailwindcss, autoprefixer],
