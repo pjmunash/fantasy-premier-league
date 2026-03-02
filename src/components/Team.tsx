@@ -366,7 +366,7 @@ const Team: React.FC = () => {
                 </div>
               </div>
               <button
-                onClick={() => navigate('/status')}
+                onClick={() => navigate('/availability')}
                 className="text-xs px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded transition whitespace-nowrap"
               >
                 View Details →
