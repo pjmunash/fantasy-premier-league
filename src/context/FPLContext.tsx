@@ -19,16 +19,19 @@ interface FPLContextType {
   managerData: ManagerData | null;
   currentPicks: ManagerPicks | null;
   fixtures: Fixture[] | null;
-  
+  leagues: any | null;
+  leaguesLoading: boolean;
+  leaguesError: string | null;
+
   // Planning
   transferPlans: TransferPlan[];
   chipPlans: ChipPlan[];
   selectedGameweek: number;
-  
+
   // Loading states
   loading: boolean;
   error: string | null;
-  
+
   // Actions
   connectTeam: (teamId: number) => Promise<void>;
   refreshData: () => Promise<void>;
@@ -38,7 +41,7 @@ interface FPLContextType {
   removeTransferPlan: (gameweek: number) => void;
   addChipPlan: (plan: ChipPlan) => void;
   removeChipPlan: (gameweek: number) => void;
-  
+
   // Helpers
   getPlayer: (id: number) => Player | undefined;
   getPlayerWithLiveData: (id: number, gw?: number) => Player | undefined;
@@ -48,9 +51,19 @@ interface FPLContextType {
   getFinancialStatus: (gw: number) => { bank: number; squadValue: number; totalBudget: number };
   fetchPlayerLeagues: (teamId: number) => Promise<any>;
   fetchLeagueStandings: (leagueId: number, pageNumber?: number, isHeadToHead?: boolean) => Promise<any>;
+  refreshLeagues: () => Promise<void>;
 }
 
+
 const FPLContext = createContext<FPLContextType | undefined>(undefined);
+
+export function useFPL() {
+  const context = useContext(FPLContext);
+  if (!context) {
+    throw new Error('useFPL must be used within an FPLProvider');
+  }
+  return context;
+}
 
 export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [bootstrapData, setBootstrapData] = useState<FPLBootstrapData | null>(null);
@@ -64,6 +77,9 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [selectedGameweek, setSelectedGameweekState] = useState<number>(storage.getSelectedGW() || 1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [leagues, setLeagues] = useState<any | null>(null);
+  const [leaguesLoading, setLeaguesLoading] = useState(false);
+  const [leaguesError, setLeaguesError] = useState<string | null>(null);
 
   useEffect(() => {
     // Load from session storage on mount
@@ -109,7 +125,6 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       if (!bootstrapData) {
         const data = await fplApi.getBootstrapData();
         setBootstrapData(data);
-        
         const fixturesData = await fplApi.getFixtures();
         setFixtures(fixturesData);
       }
@@ -127,12 +142,41 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setCurrentPicks(picks);
       setPicksByGW(prev => ({ ...prev, [currentGW]: picks }));
 
+      // Fetch leagues
+      setLeaguesLoading(true);
+      setLeaguesError(null);
+      try {
+        const leaguesData = await fetchPlayerLeagues(teamId);
+        setLeagues(leaguesData);
+      } catch (err: any) {
+        setLeaguesError('Failed to load leagues.');
+        setLeagues(null);
+      } finally {
+        setLeaguesLoading(false);
+      }
+
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to connect team. Please check the Team ID.';
       setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
+    }
+  };
+  // Manual refresh for leagues
+  const refreshLeagues = async () => {
+    const teamId = storage.getTeamId();
+    if (!teamId) return;
+    setLeaguesLoading(true);
+    setLeaguesError(null);
+    try {
+      const leaguesData = await fetchPlayerLeagues(teamId);
+      setLeagues(leaguesData);
+    } catch (err: any) {
+      setLeaguesError('Failed to load leagues.');
+      setLeagues(null);
+    } finally {
+      setLeaguesLoading(false);
     }
   };
 
@@ -152,57 +196,61 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const disconnect = () => {
     storage.clear();
-    setManagerData(null);
-    setCurrentPicks(null);
-    setPicksByGW({});
-    setTransferPlans([]);
-    setChipPlans([]);
-    setError(null);
-  };
-
-  const setSelectedGameweek = (gw: number) => {
-    setSelectedGameweekState(gw);
-    storage.setSelectedGW(gw);
-  };
-
-  // When the selected gameweek changes, fetch official picks and live data
-  useEffect(() => {
-    const teamId = storage.getTeamId();
-    if (!teamId || !selectedGameweek) return;
-    
-    // Early return: both picks and live data already cached for this GW
-    if (picksByGW[selectedGameweek] && liveData[selectedGameweek]) {
-      return;
-    }
-
-    const fetchData = async () => {
-      try {
-        // Batch parallel fetches instead of sequential
-        const [picks, live] = await Promise.all([
-          !picksByGW[selectedGameweek] ? fplApi.getManagerPicks(teamId, selectedGameweek) : Promise.resolve(null),
-          !liveData[selectedGameweek] ? fplApi.getLiveGameweek(selectedGameweek).catch(() => null) : Promise.resolve(null)
-        ]);
-
-        // Only update if we actually fetched (not null)
-        if (picks) {
-          setPicksByGW(prev => ({ ...prev, [selectedGameweek]: picks }));
-          // Keep currentPicks in sync if this is the current GW
-          if (managerData?.current_event === selectedGameweek) {
-            setCurrentPicks(picks);
-          }
-        }
-
-        if (live) {
-          setLiveData(prev => ({ ...prev, [selectedGameweek]: live }));
-        }
-      } catch (err) {
-        console.error('Failed to fetch data for GW', selectedGameweek, err);
-      }
-    };
-
-    fetchData();
-  }, [selectedGameweek]);
-
+    return (
+      <FPLContext.Provider
+        value={{
+          bootstrapData,
+          managerData,
+          currentPicks,
+          fixtures,
+          leagues,
+          leaguesLoading,
+          leaguesError,
+          transferPlans,
+          chipPlans,
+          selectedGameweek,
+          loading,
+          error,
+          connectTeam,
+          refreshData,
+          disconnect,
+          setSelectedGameweek,
+          addTransferPlan: plan => setTransferPlans(prev => [...prev, plan]),
+          removeTransferPlan: gw => setTransferPlans(prev => prev.filter(p => p.gameweek !== gw)),
+          addChipPlan: plan => setChipPlans(prev => [...prev, plan]),
+          removeChipPlan: gw => setChipPlans(prev => prev.filter(p => p.gameweek !== gw)),
+          getPlayer: id => bootstrapData?.elements.find(p => p.id === id),
+          getPlayerWithLiveData: (id, gw) => {
+            const player = bootstrapData?.elements.find(p => p.id === id);
+            if (!player) return undefined;
+            if (!gw) return player;
+            const live = liveData[gw]?.elements?.find((p: any) => p.id === id);
+            return live ? { ...player, ...live } : player;
+          },
+          getTeam: id => bootstrapData?.teams.find(t => t.id === id),
+          getCurrentGameweek: () => bootstrapData?.events.find(e => e.is_current)?.id || 1,
+          getPicksForGameweek: gw => picksByGW[gw] || null,
+          getFinancialStatus: gw => {
+            const picks = picksByGW[gw];
+            if (!picks) return { bank: 0, squadValue: 0, totalBudget: 0 };
+            const squadValue = picks.picks.reduce((sum, pick) => {
+              const player = bootstrapData?.elements.find(p => p.id === pick.element);
+              return sum + (player?.now_cost || 0);
+            }, 0) / 10;
+            return {
+              bank: picks.entry_history.bank / 10,
+              squadValue,
+              totalBudget: squadValue + picks.entry_history.bank / 10,
+            };
+          },
+          fetchPlayerLeagues,
+          fetchLeagueStandings,
+          refreshLeagues,
+        }}
+      >
+        {children}
+      </FPLContext.Provider>
+    );
   const addTransferPlan = (plan: TransferPlan) => {
     const updated = [...transferPlans.filter(p => p.gameweek !== plan.gameweek), plan];
     setTransferPlans(updated);
@@ -384,6 +432,7 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+
   return (
     <FPLContext.Provider
       value={{
@@ -391,6 +440,10 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         managerData,
         currentPicks,
         fixtures,
+        leagues,
+        leaguesLoading,
+        leaguesError,
+        refreshLeagues,
         transferPlans,
         chipPlans,
         selectedGameweek,
@@ -419,10 +472,10 @@ export const FPLProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   );
 };
 
-export const useFPL = () => {
+export function useFPL() {
   const context = useContext(FPLContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useFPL must be used within an FPLProvider');
   }
   return context;
-};
+}

@@ -16,7 +16,7 @@ const Live: React.FC = () => {
 
   // Current GW
   const currentGW = useMemo(() => {
-    return bootstrapData?.events.find(e => e.is_current)?.id || 1;
+    return bootstrapData?.events.find((e: any) => e.is_current)?.id || 1;
   }, [bootstrapData]);
 
   // Current GW stats - get picks for current GW
@@ -35,11 +35,11 @@ const Live: React.FC = () => {
     if (!currentPicks || !currentGW) return [];
     return currentPicks.picks
       .slice(0, 11)
-      .map(pick => ({
+      .map((pick: any) => ({
         pick,
         player: getPlayerWithLiveData(pick.element, currentGW),
       }))
-      .filter(p => p.player);
+      .filter((p: any) => p.player);
   }, [currentPicks, currentGW, getPlayerWithLiveData]);
 
   // Bench players (shown separately when bench boost is active)
@@ -49,20 +49,20 @@ const Live: React.FC = () => {
     if (!isBenchBoost) return [];
     return currentPicks.picks
       .slice(11, 15)
-      .map(pick => ({
+      .map((pick: any) => ({
         pick,
         player: getPlayerWithLiveData(pick.element, currentGW),
       }))
-      .filter(p => p.player);
+      .filter((p: any) => p.player);
   }, [currentPicks, currentGW, getPlayerWithLiveData]);
 
   // Group by position
   const positionGroups = useMemo(() => {
     return {
-      gk: startingXI.filter(p => p.player?.element_type === 1),
-      def: startingXI.filter(p => p.player?.element_type === 2),
-      mid: startingXI.filter(p => p.player?.element_type === 3),
-      fwd: startingXI.filter(p => p.player?.element_type === 4),
+      gk: startingXI.filter((p: any) => p.player?.element_type === 1),
+      def: startingXI.filter((p: any) => p.player?.element_type === 2),
+      mid: startingXI.filter((p: any) => p.player?.element_type === 3),
+      fwd: startingXI.filter((p: any) => p.player?.element_type === 4),
     };
   }, [startingXI]);
 
@@ -73,8 +73,8 @@ const Live: React.FC = () => {
     const picksToCount = isBenchBoost ? currentPicks.picks : currentPicks.picks.slice(0, 11);
 
     let total = 0;
-    let captainPick = picksToCount.find(p => p.is_captain);
-    let vicePick = picksToCount.find(p => p.is_vice_captain);
+    let captainPick = picksToCount.find((p: any) => p.is_captain);
+    let vicePick = picksToCount.find((p: any) => p.is_vice_captain);
     let captainPoints = 0;
     let vicePoints = 0;
     if (captainPick) {
@@ -85,7 +85,7 @@ const Live: React.FC = () => {
       const player = getPlayerWithLiveData(vicePick.element, currentGW);
       vicePoints = player?.event_points || 0;
     }
-    picksToCount.forEach(pick => {
+    picksToCount.forEach((pick: any) => {
       // Don't double captain/vice here
       if (!pick.is_captain && !pick.is_vice_captain) {
         const player = getPlayerWithLiveData(pick.element, currentGW);
@@ -324,7 +324,7 @@ const Live: React.FC = () => {
             {positionGroups.fwd.length > 0 && (
               <div>
                 <div className="flex flex-wrap justify-center gap-6">
-                  {positionGroups.fwd.map(item => renderPlayerCard(item))}
+                  {positionGroups.fwd.map((item: any) => renderPlayerCard(item))}
                 </div>
               </div>
             )}
@@ -333,7 +333,7 @@ const Live: React.FC = () => {
             {positionGroups.mid.length > 0 && (
               <div>
                 <div className="flex flex-wrap justify-center gap-6">
-                  {positionGroups.mid.map(item => renderPlayerCard(item))}
+                  {positionGroups.mid.map((item: any) => renderPlayerCard(item))}
                 </div>
               </div>
             )}
@@ -342,7 +342,7 @@ const Live: React.FC = () => {
             {positionGroups.def.length > 0 && (
               <div>
                 <div className="flex flex-wrap justify-center gap-6">
-                  {positionGroups.def.map(item => renderPlayerCard(item))}
+                  {positionGroups.def.map((item: any) => renderPlayerCard(item))}
                 </div>
               </div>
             )}
@@ -351,7 +351,7 @@ const Live: React.FC = () => {
             {positionGroups.gk.length > 0 && (
               <div>
                 <div className="flex flex-wrap justify-center gap-6">
-                  {positionGroups.gk.map(item => renderPlayerCard(item))}
+                  {positionGroups.gk.map((item: any) => renderPlayerCard(item))}
                 </div>
               </div>
             )}
@@ -366,7 +366,7 @@ const Live: React.FC = () => {
               Bench Players
             </h3>
             <div className="flex flex-wrap justify-center gap-8">
-              {benchPlayers.map(item => renderPlayerCard(item))}
+              {benchPlayers.map((item: any) => renderPlayerCard(item))}
             </div>
           </div>
         )}
